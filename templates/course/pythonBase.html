@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <!--<meta name="viewport"-->
+          <!--content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/css/bodymain.css">
+    <link rel="stylesheet" href="/static/css/home.css">
+    <script src="/static/js/jquery-1.12.4.min.js"></script>
+    <title>百知课程后台管理系统-首页
+    </title>
+
+</head>
+<body>
+<!--导航-->
+<nav class="navbar navbar-default nav-self">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">百知课程后台管理系统</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="{% url 'user:login' %}" role="button">{{ username }} <span class="glyphicon glyphicon-log-in"></span></a>
+                </li>
+                <li>
+                    <a href="{% url 'user:logout' %}">退出 <span class="glyphicon glyphicon-log-out"></span></a>
+                </li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="">
+                </div>
+                <div class="btn-group" role="group" aria-label="...">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</nav>
+
+
+
+<!--内容面板-->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Nav tabs -->
+        <div class="panel-group col-sm-2 left-side-bar" id="accordion" role="tablist" aria-multiselectable="true">
+            <div>
+                <div class="panel panel-default">
+                  <div class="panel-heading left-side-header">百知课程</div>
+                     {% for foo in cates %}
+                        <div class="course-python"><a href="{% url 'course:pythonBase' %}?id={{ foo.id }}&level={{ foo.level }}">{{ foo.title}}</a></div>
+                        <div class="list-group">
+                        {% for sub_cate in sub_cates %}
+                            {% if foo.id == sub_cate.parent_id %}
+                               <a href="{% url 'course:pythonBase' %}?id={{ sub_cate.id }}&level={{ sub_cate.level }}" class="list-group-item" >{{ sub_cate.title}}</a>
+                           {% endif %}
+                       {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- Tab panes 详情展示面板 -->
+        <div class="tab-content col-sm-10 right-side">
+            <div class="panel panel-default right-side-content">
+            <ol class="breadcrumb">
+                当前位置：
+                <li><a href="{% url 'course:index' %}?id={{ id }}&level={{ level }}">百知课程</a></li>
+                {% if  level == "1" %}
+                     <li>{{name_title}}</li>
+                {% else %}
+                    <li><a href="{% url 'course:index' %}?id={{ id }}&level=2">{{name_title}}</a></li>
+                    <li>{{ sub_cates_name }}</li>
+                {% endif %}
+            </ol>
+                <div class="panel-body caret_parent">
+                    <a href="{% url 'course:index' %}?sort=1" class="btn btn-default">阅读量 <span class="glyphicon glyphicon-arrow-down"></span></a>
+                    <a href="{% url 'course:index' %}?sort=2" class="btn btn-default">发布时间 <span class="glyphicon glyphicon-arrow-down"></span></a>
+                    <a href="{% url 'course:addArticle' %}?level={{ level }}&id={{ id }}" class="btn pull-right base-color add-course"><span class="glyphicon glyphicon-plus"></span> 增加文章</a>
+                    <a href="{% url 'course:addCourse' %}?level={{ level }}&id={{ id }}" class="btn pull-right base-color"><span class="glyphicon glyphicon-plus"></span> 增加课程/分类</a>
+                </div>
+                <div class="panel-heading">文章列表</div>
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox"/></th>
+                            <th>ID</th>
+                            <th>文章标题</th>
+                            <th>所属课程</th>
+                            <th>发布日期</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in page.object_list %}
+                        <tr>
+                            <td><input type="checkbox" class="checks"/></td>
+                            <td>{{ user.id}}</td>
+                            <td>
+                                <a href="{% url 'course:update' %}?level={{ user.cate.level }}&id={{ user.id }}">{{ user.title }}</a>
+                            </td>
+                            <td>{{ user.cate.title }}</td>
+                            <td>
+                                {{user.publish_time|date:'Y-m-d H:i:s'}}
+                            </td>
+                            <td>
+                                <a href="{% url 'course:delete_logic' %}?title={{ user.title }}"><button class="del" id="{{ user.id }}" onclick="return confirm('是否删除')">删除</button></a>
+
+{#                                onclick="location.href='{% url 'course:delete_logic' %}?id={{ user.id }}&level={{ user.level }}#}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                 <nav aria-label="Page navigation" class="pull-right pagitor-manager">
+                    <ul class="pagination">
+                        {% if page.has_previous %}
+                              <li><a href="{% url 'course:pythonBase' %}?id={{ id }}&level={{ level }}&number={{ page.previous_page_number }}"><span aria-hidden="true">&laquo;</span></a></li>
+                        {% endif %}
+                    {% for n in page.paginator.page_range %}
+                        {% if page.number == n %}
+                             <li><a class="b" href="{% url 'course:pythonBase' %}?number={{ n }}&level={{ level }}&id={{ id }}">{{ n }}</a></li>
+                        {% else %}
+                             <li><a class="a" href="{% url 'course:pythonBase' %}?number={{ n }}&level={{ level }}&id={{ id }}">{{ n }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page.has_next %}
+                         <li><a href="{% url 'course:pythonBase' %}?id={{ id }}&level={{ level }}&number={{ page.next_page_number }}"><span aria-hidden="true">&raquo;</span></a></li>
+                    {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            <!--分页显示-->
+        </div>
+
+    </div>
+
+</div>
+  <script>
+
+      {#$(".del").each(function (i) {#}
+      {#          $(this).click(function () {#}
+      {#              if(confirm("是否删除！")){#}
+      {#                  location.href = "{% url 'course:delete_logic' %}?id=" + $(".id")[i].innerHTML + "&number={{page.number}}"#}
+      {#                  return true#}
+      {#              }#}
+      {#              else{#}
+      {#                  return false#}
+      {#              }#}
+      {##}
+      {#          })#}
+      {#      })#}
+    </script>
+<div class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <h4><span class="glyphicon glyphicon-heart-empty glyphicon"></span> 关注我们</h4>
+                    <p>最受欢迎的管理平台</p>
+                    <p><a href="#" class="ic_df"> 新浪微博</a> </p>
+                    <p><a href="#" class="ic_weichat"> 官方微信</a> </p>
+                  </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <h4><span class="glyphicon glyphicon-king"> 开发平台</span> </h4>
+                    <p>加入开发平台，尊享会员福利，成为资深程序猿</p>
+                    <p class="p_idea"><a href="http://www.baizhibest.com"  class="btn btn-default btn-lg idea">我要开发</a></p>
+                  </div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="thumbnail">
+                  <div class="caption">
+                    <h4><span class="glyphicon glyphicon-phone-alt"></span> 关于我们</h4>
+                    <p>欢迎反馈宝贵意见</p>
+                    <p class="p_idea"><a href="http://www.baizhibest.com"  class="btn btn-default btn-lg idea">意见反馈</a></p>
+                  </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12 cp_info">
+                <div class="no-mp">
+                    <p>CopyRight © 2020 北京百知教育科技有限公司 All Rights Reserved</p>
+                    <p>电话：010-****888    京ICP备*******8号</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/jquery.js" type="text/javascript" charset="utf-8"></script>
+<script src="/static/js/bootstrap.js" type="text/javascript" charset="utf-8"></script>
+
+</body>
+</html>
