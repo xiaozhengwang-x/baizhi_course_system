@@ -1,10 +1,14 @@
 <template>
-$END$
+  <div>preparing for  {{username}}  congratulations</div>
 </template>
-
 <script>
 export default {
-name: "inde"
+  name: "Inde",
+  data:function (){
+    return {
+      username:this.$route.query.username
+    }
+  },
 }
 </script>
 
